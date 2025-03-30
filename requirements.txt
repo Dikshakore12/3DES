@@ -1,0 +1,5 @@
+flask
+pyDes
+python-docx
+PyPDF2
+apscheduler

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Paper Protection System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">📄 Paper Protection System</h1>
+
+        <form action="/encrypt" method="POST" enctype="multipart/form-data">
+            <h2>🔐 Encrypt and Schedule Email</h2>
+            <input type="file" name="file" accept=".txt,.pdf,.doc,.docx" required>
+            <input type="email" name="email" placeholder="Recipient Email" required>
+            <input type="date" name="date" required>
+            <input type="time" name="time" required>
+            <button type="submit">Encrypt & Schedule Email</button>
+        </form>
+
+        <hr>
+
+        <form action="/decrypt" method="POST" enctype="multipart/form-data">
+            <h2>🔓 Decrypt File</h2>
+            <input type="file" name="file" accept=".txt,.pdf,.doc,.docx" required>
+            <button type="submit">Decrypt & Download</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+/* style.css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    color: #f1f1f1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    animation: fadeIn 1.5s ease-in;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.container {
+    background-color: #1c1c1e;
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    width: 400px;
+    animation: slideUp 1s ease-in-out;
+}
+
+@keyframes slideUp {
+    0% { transform: translateY(30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+h1.title {
+    text-align: center;
+    font-size: 26px;
+    color: #00ffdd;
+    margin-bottom: 20px;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 5px #00ffdd; }
+    to { text-shadow: 0 0 20px #00ffdd, 0 0 30px #00ffdd; }
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+input, button {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+}
+
+input[type="file"] {
+    background-color: #333;
+    color: #fff;
+}
+
+input, input[type="email"], input[type="date"], input[type="time"] {
+    background-color: #2e2e2e;
+    color: #ffffff;
+    border: 1px solid #555;
+}
+
+button {
+    background-color: #00ffdd;
+    color: #1c1c1e;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #00c9aa;
+    transform: scale(1.05);
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #444;
+    margin: 20px 0;
+}
