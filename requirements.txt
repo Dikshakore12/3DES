@@ -3,3 +3,7 @@ pyDes
 python-docx
 PyPDF2
 apscheduler
+gunicorn
+pycryptodome
+python-dotenv
+
