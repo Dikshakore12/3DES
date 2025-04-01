@@ -5,10 +5,11 @@ from Crypto.Random import get_random_bytes
 import os, smtplib, threading, time, mimetypes
 from email.message import EmailMessage
 from datetime import datetime
-from dotenv import load_dotenv
 
-# ✅ Load environment variables properly
-load_dotenv()
+from dotenv import load_dotenv
+load_dotenv('pass.env')  # Add the filename here
+
+
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -62,18 +63,14 @@ def send_email_later(to_email, subject, body, file_path, send_time):
             with open(file_path, 'rb') as f:
                 msg.add_attachment(f.read(), maintype=mime_type, subtype=mime_subtype, filename=os.path.basename(file_path))
 
-            # ✅ Use Port 587 with TLS
-            with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
-                smtp.starttls()  # Secure connection
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
                 smtp.login('korediksha30@gmail.com', os.getenv("APP_PASSWORD"))
                 smtp.send_message(msg)
 
             print("✅ Email sent successfully!")
 
         except Exception as e:
-            import traceback
-            print("❌ Error sending email:", str(e))
-            print(traceback.format_exc())
+            print("❌ Error sending email:", e)
 
     threading.Thread(target=send).start()
 
