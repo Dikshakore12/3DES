@@ -1,115 +1,179 @@
-from flask import Flask, render_template, request, send_file
+# app.py
+from flask import Flask, render_template, request, send_file, jsonify
 from werkzeug.utils import secure_filename
-from Crypto.Cipher import DES3
-from Crypto.Random import get_random_bytes
-import os, smtplib, threading, time, mimetypes
-from email.message import EmailMessage
 from datetime import datetime
-
+import os
 from dotenv import load_dotenv
-load_dotenv('pass.env')  # Add the filename here
+load_dotenv("pass.env")  # expects EMAIL_USER, EMAIL_PASS
 
+from crypto_utils import (
+    derive_key_from_password,
+    encrypt_file,
+    decrypt_file,
+    hash_file,
+    Blockchain,
+)
+from scheduler import schedule_email, scheduler  # <- scheduler object
 
-
+# ---------- Flask setup ----------
 app = Flask(__name__)
-UPLOAD_FOLDER = 'uploads'
-ENCRYPTED_FOLDER = 'encrypted'
-DECRYPTED_FOLDER = 'decrypted'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(ENCRYPTED_FOLDER, exist_ok=True)
-os.makedirs(DECRYPTED_FOLDER, exist_ok=True)
+BASE = os.path.dirname(os.path.abspath(__file__))
 
-# Generate encryption key with proper parity
-key = DES3.adjust_key_parity(get_random_bytes(24))
+UPLOADS = os.path.join(BASE, "uploads")
+ENCRYPTED = os.path.join(BASE, "encrypted")
+DECRYPTED = os.path.join(BASE, "decrypted")
+os.makedirs(UPLOADS, exist_ok=True)
+os.makedirs(ENCRYPTED, exist_ok=True)
+os.makedirs(DECRYPTED, exist_ok=True)
 
-# Encrypt the file using Triple DES
-def encrypt_file(filepath, encrypted_path):
-    cipher = DES3.new(key, DES3.MODE_EAX)
-    with open(filepath, 'rb') as f:
-        plaintext = f.read()
-    nonce = cipher.nonce
-    ciphertext = cipher.encrypt(plaintext)
-    with open(encrypted_path, 'wb') as f:
-        f.write(nonce + ciphertext)
+# ---------- Blockchain ----------
+chain = Blockchain()
 
-# Decrypt the file using Triple DES
-def decrypt_file(encrypted_path, decrypted_path):
-    with open(encrypted_path, 'rb') as f:
-        nonce = f.read(16)
-        ciphertext = f.read()
-    cipher = DES3.new(key, DES3.MODE_EAX, nonce=nonce)
-    plaintext = cipher.decrypt(ciphertext)
-    with open(decrypted_path, 'wb') as f:
-        f.write(plaintext)
-
-# Send email at a specific time with error handling
-def send_email_later(to_email, subject, body, file_path, send_time):
-    def send():
-        try:
-            now = datetime.now()
-            delay = (send_time - now).total_seconds()
-            if delay > 0:
-                time.sleep(delay)
-
-            msg = EmailMessage()
-            msg['Subject'] = subject
-            msg['From'] = 'korediksha30@gmail.com'
-            msg['To'] = to_email
-            msg.set_content(body)
-
-            mime_type, _ = mimetypes.guess_type(file_path)
-            mime_type, mime_subtype = mime_type.split('/')
-
-            with open(file_path, 'rb') as f:
-                msg.add_attachment(f.read(), maintype=mime_type, subtype=mime_subtype, filename=os.path.basename(file_path))
-
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                smtp.login('korediksha30@gmail.com', os.getenv("APP_PASSWORD"))
-                smtp.send_message(msg)
-
-            print("✅ Email sent successfully!")
-
-        except Exception as e:
-            print("❌ Error sending email:", e)
-
-    threading.Thread(target=send).start()
-
-# Home page
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-# Encrypt file and schedule email
-@app.route('/encrypt', methods=['POST'])
-def encrypt():
-    file = request.files['file']
-    to_email = request.form['email']
-    date = request.form['date']
-    time_input = request.form['time']
-    filename = secure_filename(file.filename)
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
+# ---------- File History ----------
+@app.route("/file-history/<filename>")
+def file_history(filename):
+    history = chain.get_file_history(filename)
+    return jsonify({"history": history})
 
-    encrypted_path = os.path.join(ENCRYPTED_FOLDER, 'enc_' + filename)
-    encrypt_file(filepath, encrypted_path)
+# ---------- Schedule email ----------
+@app.route("/encrypt", methods=["POST"])
+def route_encrypt():
+    try:
+        f = request.files.get("file")
+        password = request.form.get("password", "").strip()
+        to_email = request.form.get("email", "").strip()
+        date_str = request.form.get("date", "")
+        time_str = request.form.get("time", "")
 
-    send_time = datetime.strptime(date + ' ' + time_input, '%Y-%m-%d %H:%M')
-    send_email_later(to_email, 'Encrypted File', 'Please find the encrypted file attached.', encrypted_path, send_time)
+        if not (f and password and to_email and date_str and time_str):
+            return jsonify({"status": "error", "message": "Missing inputs"}), 400
 
-    return '✅ File encrypted and email scheduled!'
+        # ✅ derive key + generate random salt
+        key, salt = derive_key_from_password(password)
 
-# Decrypt uploaded file
-@app.route('/decrypt', methods=['POST'])
-def decrypt():
-    file = request.files['file']
-    filename = secure_filename(file.filename)
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
+        filename = secure_filename(f.filename)
+        src_path = os.path.join(UPLOADS, filename)
+        f.save(src_path)
 
-    decrypted_path = os.path.join(DECRYPTED_FOLDER, 'dec_' + filename)
-    decrypt_file(filepath, decrypted_path)
+        enc_name = f"enc_" + filename
+        enc_path = os.path.join(ENCRYPTED, enc_name)
+        encrypt_file(src_path, enc_path, key)
 
-    return send_file(decrypted_path, as_attachment=True)
+        # store salt alongside encrypted file
+        with open(enc_path + ".salt", "wb") as sf:
+            sf.write(salt)
 
-if __name__ == '__main__':
+        # blockchain record
+        enc_hash = hash_file(enc_path)
+        chain.create_block(
+            data={
+                "filename": filename,
+                "encrypted_file": enc_name,
+                "enc_hash": enc_hash,
+                "email": to_email,
+                "scheduled_for": f"{date_str} {time_str}"
+            },
+            previous_hash=chain.last()["hash"]
+        )
+
+        # schedule email
+        send_time = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+        subject = "Encrypted File (Blockchain Verified)"
+        body = f"""Your encrypted file is attached.
+
+Blockchain:
+ - Hash: {enc_hash}
+ - Filename: {enc_name}
+ - Scheduled For: {send_time}
+
+(This email was auto-sent by PPS)
+"""
+        job_id = schedule_email(to_email, subject, body, enc_path, send_time)
+
+        return jsonify({
+            "status": "success",
+            "message": f"Encrypted, recorded on blockchain, and scheduled email (job: {job_id})",
+            "file": enc_name,
+            "job_id": job_id,
+            "email_status_url": f"/email-status/{job_id}"
+        })
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Exception: {e}"}), 500
+
+
+# ---------- Decrypt ----------
+@app.route("/decrypt", methods=["POST"])
+def route_decrypt():
+    try:
+        f = request.files.get("file")
+        password = request.form.get("password", "").strip()
+
+        if not (f and password):
+            return jsonify({"status": "error", "message": "Missing file or password"}), 400
+
+        filename = secure_filename(f.filename)
+        src_path = os.path.join(UPLOADS, filename)
+        f.save(src_path)
+
+        # read corresponding salt file
+        salt_path = os.path.join(ENCRYPTED, filename + ".salt")
+        if not os.path.exists(salt_path):
+            return jsonify({"status": "error", "message": "Missing salt for decryption"}), 400
+
+        with open(salt_path, "rb") as sf:
+            salt = sf.read()
+
+        key, _ = derive_key_from_password(password, salt)
+
+        # verify blockchain
+        enc_hash = hash_file(src_path)
+        if not chain.contains_enc_hash(enc_hash):
+            return jsonify({"status": "error", "message": "File integrity could not be verified on blockchain!"}), 400
+
+        dec_name = f"dec_" + filename
+        dec_path = os.path.join(DECRYPTED, dec_name)
+
+        decrypt_file(src_path, dec_path, key)
+
+        return jsonify({
+            "status": "success",
+            "message": "File decrypted successfully",
+            "download_url": f"/download/{dec_name}"
+        })
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Decryption failed / Exception: {e}"}), 500
+
+
+
+# ---------- Download decrypted file ----------
+@app.route("/download/<filename>")
+def download_file(filename):
+    path = os.path.join(DECRYPTED, filename)
+    if os.path.exists(path):
+        return send_file(path, as_attachment=True)
+    return "❌ File not found", 404
+
+# ---------- Email Status ----------
+@app.route("/email-status/<job_id>")
+def email_status(job_id):
+    """Get the status of a scheduled email"""
+    from scheduler import get_email_status
+    status = get_email_status(job_id)
+    return jsonify(status)
+
+# ---------- Inspect chain ----------
+@app.route("/blockchain", methods=["GET"])
+def route_chain():
+    ok = chain.verify_chain()
+    return jsonify({"valid": ok, "length": len(chain.chain), "chain": chain.chain})
+
+@app.route("/health")
+def health():
+    return "OK", 200
     app.run(debug=True)

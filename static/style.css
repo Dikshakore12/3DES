@@ -1,90 +1,256 @@
-/* style.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-    color: #f1f1f1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    animation: fadeIn 1.5s ease-in;
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
+  transition: background 0.5s;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #111;
+  padding: 30px 20px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: width 0.3s;
+}
+
+.sidebar .logo h2 {
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #00f7ff;
+  text-shadow: 0 0 5px #00f7ff;
+}
+
+.sidebar .logo p {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar ul li {
+  margin: 18px 0;
+}
+
+.sidebar ul li a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.sidebar ul li a:hover {
+  color: #00f7ff;
+  transform: translateX(5px);
+  font-weight: bold;
+}
+
+/* Main Content */
+.main-content {
+  flex-grow: 1;
+  padding: 40px 60px;
+  overflow-y: auto;
+}
+
+header h1 {
+  font-size: 30px;
+  margin-bottom: 5px;
+}
+
+header p {
+  font-size: 16px;
+  color: #ccc;
+  margin-bottom: 30px;
+}
+
+/* Sections */
+.section {
+  display: none;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.section.active {
+  display: block;
 }
 
 @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(-20px); }
-    100% { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.container {
-    background-color: #1c1c1e;
-    padding: 30px 40px;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-    width: 400px;
-    animation: slideUp 1s ease-in-out;
+/* Form Card */
+.form-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-@keyframes slideUp {
-    0% { transform: translateY(30px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
+.form-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.6);
 }
 
-h1.title {
-    text-align: center;
-    font-size: 26px;
-    color: #00ffdd;
-    margin-bottom: 20px;
-    animation: glow 2s ease-in-out infinite alternate;
+.form-card label {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #ddd;
 }
 
-@keyframes glow {
-    from { text-shadow: 0 0 5px #00ffdd; }
-    to { text-shadow: 0 0 20px #00ffdd, 0 0 30px #00ffdd; }
+/* Inputs and Buttons */
+input[type="file"],
+input[type="email"],
+input[type="date"],
+input[type="time"],
+input[type="password"] {
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: background 0.3s, transform 0.2s;
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-    margin-top: 10px;
+input[type="file"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="password"]:focus {
+  background: rgba(0, 247, 255, 0.1);
+  outline: none;
+  transform: scale(1.02);
 }
 
-input, button {
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: none;
-    font-size: 14px;
-}
-
-input[type="file"] {
-    background-color: #333;
-    color: #fff;
-}
-
-input, input[type="email"], input[type="date"], input[type="time"] {
-    background-color: #2e2e2e;
-    color: #ffffff;
-    border: 1px solid #555;
+input::placeholder {
+  color: #aaa;
 }
 
 button {
-    background-color: #00ffdd;
-    color: #1c1c1e;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  background: linear-gradient(90deg, #00f7ff, #0072ff);
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 6px;
 }
 
 button:hover {
-    background-color: #00c9aa;
-    transform: scale(1.05);
+  opacity: 0.85;
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 247, 255, 0.4);
 }
 
-hr {
-    border: 0;
-    height: 1px;
-    background: #444;
-    margin: 20px 0;
+/* History List */
+.history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-list li {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: 0.3s;
+}
+
+.history-list li:hover {
+  background: rgba(0, 247, 255, 0.1);
+  transform: translateX(5px);
+  box-shadow: 0 6px 18px rgba(0,247,255,0.4);
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 15px;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  color: #000;
+  font-weight: bold;
+  z-index: 9999;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  animation: slideIn 0.5s ease, fadeOut 0.5s ease 3s forwards;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; }
+}
+
+/* Notification at the bottom of the screen */
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+.notification.error {
+  background-color: #f44336;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
