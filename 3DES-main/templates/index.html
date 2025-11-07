@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paper Protection System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">
+      <h2>🛡️ PPS</h2>
+      <p>Secure Docs with Blockchain</p>
+    </div>
+    <ul>
+      <li><a href="#" onclick="showSection('dashboard')">📊 Dashboard</a></li>
+      <li><a href="#" onclick="showSection('encrypt')">🔒 Encrypt & Schedule</a></li>
+      <li><a href="#" onclick="showSection('decrypt')">🔓 Decrypt</a></li>
+      <li><a href="#" onclick="showSection('history')">📜 History</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header>
+      <h1>🛡️ Paper Protection System</h1>
+      <p>Blockchain + 3DES/AES Encryption powered document security</p>
+    </header>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="section active">
+      <h2>Dashboard</h2>
+      <p>Welcome to PPS! Select an option from the sidebar.</p>
+    </section>
+
+   <!-- Encrypt Section -->
+<section id="encrypt" class="section">
+  <h2>Encrypt & Schedule Email</h2>
+  <div class="form-card">
+    <form id="encryptForm">
+      <label>Select File (PDF, DOCX, TXT)</label>
+      <input type="file" id="fileInput" required>
+      <br>
+      <label>Password</label>
+      <input type="password" id="passwordInput" placeholder="Enter encryption password" required>
+      <br>
+      <label>Recipient Email</label>
+      <input type="email" id="emailInput" placeholder="Enter recipient email" required>
+      <div class="form-group-inline">
+        <div>
+          <label>Schedule Date</label>
+          <input type="date" id="dateInput" required>
+        </div>
+        <div>
+          <label>Schedule Time</label>
+          <input type="time" id="timeInput" required>
+        </div>
+      </div>
+      <button type="submit">Encrypt & Send</button>
+    </form>
+  </div>
+</section>
+
+<!-- Decrypt Section -->
+<section id="decrypt" class="section">
+  <h2>Decrypt Document</h2>
+  <div class="form-card">
+    <form id="decryptForm">
+      <label>Select Encrypted File</label>
+      <input type="file" id="decryptFile" required>
+      <br>
+      <label>Password</label>
+      <input type="password" id="decryptPassword" placeholder="Enter decryption password" required>
+      <button type="submit">Decrypt</button>
+    </form>
+  </div>
+</section>
+
+
+    <!-- History -->
+    <section id="history" class="section">
+      <h2>History</h2>
+      <div class="form-card">
+        <div class="email-status-check">
+          <h3>Email Delivery Status</h3>
+          <div class="form-group">
+            <label>Job ID</label>
+            <div class="input-group">
+              <input type="text" id="job-id-search" placeholder="Enter job ID">
+              <button id="check-email-status">Check Status</button>
+            </div>
+          </div>
+          <div id="email-status-result"></div>
+        </div>
+        <h3>Recent Activities</h3>
+        <ul id="historyList" class="history-list"></ul>
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>
