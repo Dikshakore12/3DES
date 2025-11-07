@@ -1,0 +1,12 @@
+Flask==3.0.2
+Flask-Mail==0.9.1
+pycryptodome==3.20.0
+python-docx==1.1.2
+PyPDF2==3.0.1
+apscheduler==3.10.4
+web3==6.20.1
+python-dotenv==1.0.1
+sendgrid==6.11.0
+gunicorn==23.0.0
+
+
