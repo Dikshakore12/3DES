@@ -1,0 +1,7 @@
+2025-08-21 23:06:22,073 - INFO - Scheduler started
+2025-08-21 23:06:22,075 - INFO - Scheduler has been shut down
+2025-08-21 23:06:31,309 - INFO - Scheduler started
+2025-08-21 23:06:31,318 - INFO - Scheduler has been shut down
+2025-08-21 23:09:37,768 - INFO - Scheduler started
+2025-08-21 23:09:37,769 - INFO - Scheduler started successfully.
+2025-08-21 23:09:37,777 - INFO - Scheduler has been shut down
